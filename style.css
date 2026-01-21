@@ -1,0 +1,376 @@
+
+/* Reset and base */
+* { box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+html,body { height:100%; margin:0; font-family: Inter, system-ui, "Segoe UI", Roboto, Arial, sans-serif; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; color: #e6eef3; }
+.container { max-width:1100px; margin:18px auto; padding:16px; }
+h1 { margin:0 0 12px 0; font-size:18px; font-weight:600; text-align:center; color:#e6eef3; }
+/* animated blurry multicolor background (no :root) */
+/* animated blurry multicolor background applied to body (no .bg-blobs) */
+body {
+  background: #0b1220; /* dark fallback */
+  position: relative;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* main colorful layer (lighter, faster drift) */
+body::before {
+  content: "";
+  position: fixed;
+  inset: -20% -20% -20% -20%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(28% 28% at 12% 22%, rgba(6,40,90,0.92), transparent 40%),
+    radial-gradient(22% 22% at 78% 18%, rgba(3,120,210,0.82), transparent 40%),
+    radial-gradient(20% 20% at 58% 68%, rgba(255,140,0,0.72), transparent 40%),
+    radial-gradient(10% 10% at 50% 40%, rgba(255,255,255,0.45), transparent 40%);
+  background-blend-mode: screen, screen, screen, screen;
+  filter: blur(34px) saturate(115%);
+  opacity: 0.92;
+  transform: translateZ(0);
+  animation: body-drift-1 20s linear infinite alternate;
+}
+
+/* subtle deeper layer for depth (very faint, no hard edges) */
+body::after {
+  content: "";
+  position: fixed;
+  inset: -28% -28% -28% -28%;
+  z-index: -3;
+  pointer-events: none;
+  background:
+    radial-gradient(36% 36% at 18% 30%, rgba(4,18,36,0.28), transparent 45%),
+    radial-gradient(30% 30% at 82% 82%, rgba(8,28,52,0.22), transparent 45%);
+  filter: blur(56px) contrast(102%);
+  opacity: 0.48;
+  transform: translateZ(0);
+  animation: body-drift-2 30s ease-in-out infinite alternate;
+}
+
+/* gentle, bounded motion so blobs move but stay reasonable in size/position */
+@keyframes body-drift-1 {
+  0%   { transform: translate3d(-1.5%, -1%, 0) scale(1); filter: blur(34px) saturate(110%); }
+  50%  { transform: translate3d(1.5%, 1.2%, 0) scale(1.02); filter: blur(36px) saturate(120%); }
+  100% { transform: translate3d(-0.8%, 1.6%, 0) scale(1); filter: blur(34px) saturate(115%); }
+}
+@keyframes body-drift-2 {
+  0%   { transform: translate3d(0%, 0%, 0) scale(1); opacity: 0.46; }
+  50%  { transform: translate3d(1.2%, -1.2%, 0) scale(1.03); opacity: 0.56; }
+  100% { transform: translate3d(-1%, 1%, 0) scale(1); opacity: 0.48; }
+}
+
+/* keep header readable above animated background */
+header, .league-bar {
+  position: relative;
+  z-index: 5;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(6px);
+}
+
+/* accessibility and performance */
+@media (max-width:640px) {
+  body::before { filter: blur(28px) saturate(105%); opacity: 0.88; }
+  body::after  { filter: blur(44px); opacity: 0.42; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; transition: none; }
+}
+
+/* keep header readable above animated background */
+header, .league-bar {
+  position: relative;
+  z-index: 5;
+  background: rgba(255,255,255,0.95); /* light header so dark logos remain visible */
+  backdrop-filter: blur(6px);
+}
+
+/* reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; transition: none; }
+}
+/* Header / league bar (light background so icons are visible) */
+.league-bar {
+  display:flex;
+  gap:12px;
+  justify-content:center;
+  align-items:center;
+  padding:12px 14px;
+  background: #ffffff;           /* header background */
+  color: #0b0b0b;                /* header text color */
+  border-bottom: 1px solid #e6e9ee;
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
+}
+.league-logo {
+  height:16px;               /* larger visible size */
+  width:auto;
+  cursor:pointer;
+  opacity:0.4;
+  transition: transform .14s ease, opacity .14s ease;
+  filter: none;
+}
+.league-logo:hover { transform: translateY(-3px) scale(1.26); }
+.league-logo.active { transform: scale(1.2); box-shadow: 0 8px 22px rgba(0,0,0,0.06); margin: 10px; opacity: 1;}
+
+/* Controls */
+.controls { display:flex; gap:12px; align-items:center; justify-content:center; margin:12px 0; flex-wrap:wrap; }
+#teamSearch {
+  width:320px; max-width:86%;
+  padding:9px 10px; border-radius:8px; border:1px solid rgba(0,0,0,0.06);
+  background: #fff; color: #0b0b0b; font-size:15px;
+  outline:none;
+}
+
+/* Table wrapper */
+.table-wrap {
+  width:100%;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+  background: transparent;
+  border-radius:8px;
+  padding:6px 0;
+}
+
+/* Table: natural sizing, normal font size, allow wrapping for team names */
+.standings {
+  width:100%;
+  border-collapse:collapse;
+  table-layout:auto;            /* let browser size columns naturally */
+  font-size: 15px;
+  min-width:0;                  /* prevent forcing overflow */
+}
+
+/* Header cells */
+thead th {
+  padding:10px 12px;
+  text-align:center;
+  font-weight:700;
+  font-size:13px;
+  color:#2b3a42;
+  position:sticky;
+  top:0;
+  background: linear-gradient(180deg, #ffffff, #fbfcfd);
+  border-bottom:1px solid rgba(0,0,0,0.06);
+  z-index:2;
+}
+
+/* Body rows and cells */
+tbody tr { border-bottom:1px solid rgba(255,255,255,0.04); }
+tbody tr:nth-child(even) { background: rgba(255,255,255,0.01); }
+td {
+  padding:10px 12px;
+  text-align:center;
+  vertical-align:middle;
+  white-space:normal;           /* allow wrapping where needed */
+  word-break:break-word;
+  color: #e6eef3;
+}
+
+/* Team cell: crest + name, allow wrapping for names */
+.team {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-align:left;
+  padding-left:6px;
+}
+.crest {
+  width:36px;                   /* larger crest */
+  height:36px;
+  object-fit:contain;
+  border-radius:6px;
+  background: rgba(0,0,0,0.04);
+  padding:3px;
+  flex:0 0 36px;
+}
+.teamText { min-width:0; }       /* allow flex child to shrink */
+.teamName {
+  font-weight:700;
+  color:#e6eef3;
+  white-space:normal;           /* allow wrapping instead of truncation */
+  line-height:1.18;
+  font-size:15px;
+}
+.teamMeta {
+  color:#9aa3ad;
+  font-size:12px;
+  margin-top:2px;
+}
+
+/* Position and numeric columns styling */
+.pos { font-weight:800; color:#1db954; }
+
+/* Keep numeric columns compact but not forcing overflow */
+.standings td:nth-child(n+3):not(.team) {
+  white-space:nowrap;
+  text-align:center;
+  padding-left:6px;
+  padding-right:6px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Give numeric columns a modest width hint without forcing page overflow */
+.standings td:nth-child(3),
+.standings td:nth-child(4),
+.standings td:nth-child(5),
+.standings td:nth-child(6),
+.standings td:nth-child(7),
+.standings td:nth-child(8),
+.standings td:nth-child(9),
+.standings td:nth-child(10) {
+  width: 5.5ch;
+  max-width: 7ch;
+}
+/* Card grid and consistent sizing */
+.fixture-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  padding: 20px;
+  border-radius: 12px;
+  margin: 10px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  box-shadow: 0 8px 22px rgba(2,6,23,0.35);
+  border: 1px solid rgba(255,255,255,0.03);
+}
+
+/* middle row: three fixed columns */
+.fixture-card .middle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0px;
+}
+
+/* left and right team blocks: same width and vertical alignment */
+.fixture-card .team-block {
+  width: 160px;               /* fixed column width */
+  min-width: 160px;
+  max-width: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0px;
+  text-align: center;
+}
+
+/* crest size consistent */
+.fixture-card .crest {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  flex: 0 0 72px;
+}
+
+/* team name truncation so it never expands column */
+.fixture-card .team-block .teamName {
+  font-weight: 700;
+  font-size: 14px;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* center column fixed width so probabilities never shift */
+.fixture-card .vs-block {
+  width: 300px;               /* fixed center width */
+  min-width: 300px;
+  max-width: 300px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* percentages row centered and stable */
+.fixture-card .pct-row {
+  display: flex;
+  gap: 50px;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* probability bar fixed width */
+.fixture-card .prob-bar {
+  width: 100%;
+  max-width: 260px;
+  height: 10px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+  display: flex;
+}
+
+/* ensure the vs text is centered */
+.fixture-card .vs-text {
+  font-weight: 700;
+  color: #cfe8ff;
+  font-size: 16px;
+}
+/* hide inactive panel completely so it doesn't take space */
+.hidden {
+  display: none !important;
+}
+
+/* ensure fixtures list and standings area don't stack vertically */
+.panel {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* optional: keep content area from being extremely long */
+.content-area, .table-wrap, #fixturesList {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* small visual focus when switching */
+.panel:focus {
+  outline: 3px solid rgba(29,185,84,0.12);
+  outline-offset: 6px;
+}
+.mode-switch{display:flex;width:100%;margin:0;padding:0;gap:0;border:0px solid #e6e6e6;overflow:hidden;background:none}
+.mode-switch .mode-btn{flex:1 1 50%;width:50%;margin:0;padding-bottom: 18px;background:none;color:#fff;border:0;font-weight:700;font-size:15px;cursor:pointer;text-align:center}
+
+
+.mode-switch .mode-btn:focus-visible{outline:3px solid #1db954;outline-offset:-3px}
+/* responsive: shrink columns on small screens but keep center stable */
+@media (max-width: 640px) {
+  .fixture-card .team-block { width: 110px; min-width: 110px; max-width: 110px; }
+  .fixture-card .crest { width: 56px; height: 56px; flex: 0 0 56px; }
+  .fixture-card .vs-block { width: 220px; min-width: 220px; max-width: 220px; }
+  .fixture-card .prob-bar { max-width: 180px; }
+}
+/* Responsive adjustments */
+@media (max-width:920px) {
+  #teamSearch { width:86%; }
+  thead th, td { padding:8px 9px; font-size:14px; }
+  .league-logo { height:42px; }
+  .crest { width:32px; height:32px; flex:0 0 32px; }
+}
+
+/* Small screens: allow horizontal scroll but keep team names readable */
+@media (max-width:640px) {
+  .container { padding:10px; }
+  thead th, td { padding:7px 8px; font-size:13px; }
+  .league-logo { height:36px; }
+  .crest { width:28px; height:28px; flex:0 0 28px; }
+  .teamMeta { display:none; }
+  .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+  .standings { min-width: 100%; } /* do not force extra width beyond viewport */
+}
+
+/* Very small devices: slightly reduce font but keep wrapping */
+@media (max-width:420px) {
+  thead th, td { padding:6px 6px; font-size:13px; }
+  .teamName { font-size:14px; }
+  .crest { width:24px; height:24px; flex:0 0 24px; }
+}
+

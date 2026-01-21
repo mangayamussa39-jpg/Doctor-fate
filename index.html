@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Football Standings & Fixtures</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="mm.jpg">
+</head>
+<body>
+
+
+  <!-- League selector (keeps your existing header logos) -->
+  <header class="league-bar" role="navigation" aria-label="Leagues">
+    <!-- Put your local logo files in a logos folder and keep names consistent -->
+    <img src="epl.svg" data-league="PL" alt="Premier League" class="league-logo active" tabindex="0">
+    <img src="laliga.svg" data-league="PD" alt="La Liga" class="league-logo" tabindex="0">
+    <img src="italy.svg" data-league="SA" alt="Serie A" class="league-logo" tabindex="0">
+    <img src="german.svg" data-league="BL1" alt="Bundesliga" class="league-logo" tabindex="0">
+    <img src="l1.svg" data-league="FL1" alt="Ligue 1" class="league-logo" tabindex="0">
+    <img src="netherlands.svg" data-league="DED" alt="Eredivisie" class="league-logo" tabindex="0">
+    <img src="championship.svg" data-league="ELC" alt="Championship" class="league-logo" tabindex="0">
+    <img src="Ucl.svg" data-league="CL" alt="Champions League" class="league-logo" tabindex="0">
+  </header>
+  <!-- Mode switch: Fixtures / Standings -->
+  <div class="switcher-wrap" style="max-width:1100px;margin:18px auto 0;padding:8px 16px;">
+    <div class="mode-switch" role="tablist" aria-label="View mode" style="display:inline-flex;gap:6px;">
+      <button class="mode-btn active" role="tab" aria-selected="true" data-mode="fixtures">Fixtures</button>
+      <button class="mode-btn" role="tab" aria-selected="false" data-mode="standings">Standings</button>
+    </div>
+  </div>
+  
+  <main class="container">
+    <div class="controls">
+      <input id="teamSearch" type="search" placeholder="Search team..." aria-label="Search team">
+      <div id="status" class="status" aria-live="polite">Select a league to load data</div>
+    </div>
+
+    <!-- Content area: two panels, one for fixtures and one for standings.
+         JS will toggle .hidden on these sections when switching modes. -->
+    <section id="fixturesPanel" class="panel">
+      <div class="table-wrap" aria-live="polite">
+        <!-- Fixtures list (each fixture shows team logos) -->
+        <ul id="fixturesList" class="fixtures" style="list-style:none;margin:0;padding:0;">
+          
+        </ul>
+      </div>
+    </section>
+
+    <section id="standingsPanel" class="panel hidden" aria-hidden="true">
+      <div class="table-wrap">
+        <table id="leagueTable" class="standings" aria-describedby="status">
+          <thead>
+            <tr>
+              <th scope="col">Pos</th>
+              <th scope="col">Team</th>
+              <th scope="col">MP</th>
+              <th scope="col">W</th>
+              <th scope="col">D</th>
+              <th scope="col">L</th>
+              <th scope="col">Pts</th>
+              <th scope="col">GF</th>
+              <th scope="col">GA</th>
+              <th scope="col">GD</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script defer src="app.js"></script>
+</body>
+</html>
